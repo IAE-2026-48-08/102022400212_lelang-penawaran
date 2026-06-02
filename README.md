@@ -1,59 +1,135 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Lelang Service Penawaran
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Fitur Utama
 
-## About Laravel
+* **RESTful API Standar Kontrak:** Menyediakan 3 *endpoint* utama (Collection, Resource, Action) dengan format *response wrapper* JSON yang konsisten.
+* **Header Authentication:** Semua *endpoint* dilindungi menggunakan API Key khusus (`X-IAE-KEY`).
+* **Interactive API Documentation:** Dilengkapi dengan Swagger UI (OpenAPI 3.0) menggunakan PHP Attributes terbaru.
+* **GraphQL Implementation:** Mendukung kueri GraphQL yang dinamis beserta antarmuka GraphQL Playground untuk pengujian.
+* **Dockerized Environment:** Berjalan secara terisolasi menggunakan Docker dan SQLite untuk kemudahan pengujian.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Library & Teknologi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Komponen | Teknologi / Library |
+| :--- | :--- |
+| **Framework** | Laravel 11 (PHP 8.2) |
+| **Database** | SQLite (Bawaan) |
+| **API Documentation** | `darkaonline/l5-swagger` |
+| **GraphQL Engine** | `nuwave/lighthouse` |
+| **GraphQL UI** | `mll-lab/laravel-graphql-playground` |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Syarat Sistem
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Docker Engine / Docker Desktop** (Berjalan di latar belakang)
+* **Terminal / Windows PowerShell**
+* **Git** (Opsional, untuk proses *clone*)
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Instalasi Lokal
 
-### Premium Partners
+**1. Clone repository dan masuk ke direktori proyek:**
+```powershell
+git clone <https://github.com/IAE-2026-48-08/102022400212_lelang-penawaran.git>
+cd 102022400212_Penawaran-Service
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```
 
-## Contributing
+**2. Build dan jalankan container Docker:**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```powershell
+docker compose up --build -d
 
-## Code of Conduct
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**3. Install dependensi PHP via Composer:**
 
-## Security Vulnerabilities
+```powershell
+docker compose run app composer install
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
 
-## License
+**4. Generate Application Key:**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+docker compose run app php artisan key:generate
+
+```
+
+**5. Siapkan Database SQLite:**
+
+```powershell
+# Khusus pengguna Windows PowerShell:
+New-Item database/database.sqlite -ItemType File
+
+```
+
+**6. Jalankan Migrasi Database:**
+
+```powershell
+docker compose run app php artisan migrate
+
+```
+
+> **Info:** Setelah seluruh proses selesai, API sudah siap digunakan di `http://localhost:8000`.
+
+---
+
+## Dokumentasi & Penggunaan API
+
+### Autentikasi
+
+Seluruh *endpoint* REST maupun GraphQL dilindungi. Anda **wajib** menyertakan *header* berikut pada setiap *request*:
+
+* **Key:** `X-IAE-KEY`
+* **Value:** `102022400212`
+
+### Swagger UI (REST API)
+
+Akses antarmuka dokumentasi Swagger untuk menguji *endpoint* REST secara langsung.
+
+* **URL:** `http://localhost:8000/api/documentation`
+
+**Endpoint REST yang tersedia:**
+
+1. `GET /api/v1/bids` (Melihat daftar semua penawaran)
+2. `GET /api/v1/bids/{id}` (Melihat detail penawaran spesifik)
+3. `POST /api/v1/bids` (Mengajukan penawaran baru dengan *payload* `item_id` dan `bid_amount`)
+
+### GraphQL Playground
+
+Akses antarmuka Playground untuk melakukan kueri data penawaran secara dinamis.
+
+* **URL:** `http://localhost:8000/graphql-playground`
+
+**Cara Pengujian:**
+
+1. Klik tombol **HTTP HEADERS** di pojok kiri bawah Playground.
+2. Masukkan header keamanan:
+```json
+{
+  "X-IAE-KEY": "102022400212"
+}
+
+```
+
+
+3. Gunakan kueri berikut di panel kiri untuk mengambil data lelang:
+```graphql
+query {
+  bids {
+    id
+    item_id
+    bid_amount
+    status
+  }
+}
+
+```
+
+
+4. Tekan tombol **Play** untuk melihat hasilnya.
