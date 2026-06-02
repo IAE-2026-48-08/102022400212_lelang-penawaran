@@ -2,7 +2,7 @@
 
 ## Fitur Utama
 
-* **RESTful API Standar Kontrak:** Menyediakan 3 *endpoint* utama (Collection, Resource, Action) dengan format *response wrapper* JSON yang konsisten.
+* **RESTful API Standar Kontrak:** Menyediakan 3 *endpoint* utama dengan format *response wrapper* JSON yang konsisten.
 * **Header Authentication:** Semua *endpoint* dilindungi menggunakan API Key khusus (`X-IAE-KEY`).
 * **Interactive API Documentation:** Dilengkapi dengan Swagger UI (OpenAPI 3.0) menggunakan PHP Attributes terbaru.
 * **GraphQL Implementation:** Mendukung kueri GraphQL yang dinamis beserta antarmuka GraphQL Playground untuk pengujian.
