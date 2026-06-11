@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias(['iae.auth' => \App\Http\Middleware\VerifyIaeKey::class]);
+    $middleware->alias(['iae.auth' => \App\Http\Middleware\VerifyIaeKey::class,
+                        'jwt.verify' => \App\Http\Middleware\VerifyJwtToken::class,
+                        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
