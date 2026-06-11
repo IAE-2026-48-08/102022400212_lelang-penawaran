@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bid;
+use App\Services\AmqpPublisherService;
 use App\Services\SoapAuditService;
 use App\Services\SsoService;
 use App\Traits\ApiResponser;
@@ -22,8 +23,9 @@ class BidController extends Controller
     use ApiResponser;
 
     public function __construct(
-        private SsoService       $ssoService,
-        private SoapAuditService $soapAuditService
+        private SsoService           $ssoService,
+        private SoapAuditService     $soapAuditService,
+        private AmqpPublisherService $amqpPublisher
     ) {}
 
     #[OA\Get(
@@ -102,6 +104,36 @@ class BidController extends Controller
         } catch (\Exception $e) {
             Log::error('[SOAP] Gagal audit bid', ['error' => $e->getMessage(), 'bid_id' => $bid->id]);
         }
+
+        // Modul 3: AMQP Publisher
+        try {
+            $m2mToken = $this->ssoService->getM2MToken();
+
+            Log::debug('[AMQP] Token yang dipakai', ['token_preview' => substr($m2mToken, 0, 30) . '...']);
+
+            $published = $this->amqpPublisher->publishViaHttp(
+                'bid.placed',
+                [
+                    'event'      => 'bid.placed',
+                    'service'    => 'penawaran-service',
+                    'team_id'    => 'TEAM-02',
+                    'bid_id'     => $bid->id,
+                    'item_id'    => $bid->item_id,
+                    'user_id'    => $bid->user_id,
+                    'bid_amount' => $bid->bid_amount,
+                    'timestamp'  => now()->toIso8601String(),
+                ],
+                $m2mToken
+            );
+
+            Log::info('[AMQP] Published: ' . ($published ? 'true' : 'false'));
+
+        } catch (\Exception $e) {
+            Log::error('[AMQP] Gagal publish event', [
+                'error'  => $e->getMessage(),
+                'bid_id' => $bid->id,
+            ]);
+}
 
         return $this->successResponse(
             array_merge($bid->fresh()->toArray(), ['soap_receipt_number' => $receiptNumber]),

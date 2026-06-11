@@ -49,37 +49,15 @@ class SsoService
 
     public function getM2MToken(): string
     {
-        return Cache::get('iae_m2m_token') ?? $this->loginM2M();
-    }
+        $cached = Cache::get('iae_m2m_token');
 
-    public function loginUser(string $email, string $password): array
-    {
-        $response = Http::post("{$this->baseUrl}/api/v1/auth/token", [
-            'email'    => $email,
-            'password' => $password,
-        ]);
-
-        if (! $response->successful()) {
-            Log::warning('[SSO] User login gagal', ['email' => $email]);
-            throw new RuntimeException('Email atau password salah');
+        if ($cached) {
+            Log::debug('[SSO] Pakai M2M token dari cache');
+            return $cached;
         }
 
-        $token = $response->json('token')
-            ?? throw new RuntimeException('Token tidak ditemukan di response SSO');
-
-        $payload = $this->decodeAndVerify($token);
-        $ssoUser = $this->mapToLocalRole($token, $payload);
-
-        Log::info('[SSO] User login berhasil', [
-            'email'      => $email,
-            'local_role' => $ssoUser->localRole->name,
-        ]);
-
-        return [
-            'token'    => $token,
-            'sso_user' => $ssoUser,
-            'payload'  => $payload,
-        ];
+        Log::debug('[SSO] Cache kosong, request M2M token baru');
+        return $this->loginM2M();
     }
 
     public function decodeAndVerify(string $token): array
