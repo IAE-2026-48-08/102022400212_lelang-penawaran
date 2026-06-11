@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('bid_amount', 15, 2);
             $table->string('status')->default('winning');
             $table->timestamps();
+            $table->string('soap_receipt_number')->nullable();
         });
     }
 

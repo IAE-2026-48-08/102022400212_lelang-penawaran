@@ -18,5 +18,6 @@ class Bid extends Model
         'item_id',
         'user_id',
         'bid_amount',
+        'soap_receipt_number',
     ];
 }

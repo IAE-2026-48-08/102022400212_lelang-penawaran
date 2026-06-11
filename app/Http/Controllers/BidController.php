@@ -3,21 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bid;
-use Illuminate\Http\Request;
+use App\Services\SoapAuditService;
+use App\Services\SsoService;
 use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
+#[OA\Info(title: "Penawaran Service API", version: "1.0.0")]
+#[OA\SecurityScheme(
+    securityScheme: "ApiKeyAuth",
+    type: "apiKey",
+    in: "header",
+    name: "X-IAE-KEY"
+)]
 class BidController extends Controller
 {
     use ApiResponser;
+
+    public function __construct(
+        private SsoService       $ssoService,
+        private SoapAuditService $soapAuditService
+    ) {}
 
     #[OA\Get(
         path: "/api/v1/bids",
         summary: "Mengambil daftar penawaran",
         security: [["ApiKeyAuth" => []]],
-        responses: [
-            new OA\Response(response: 200, description: "Berhasil")
-        ]
+        responses: [new OA\Response(response: 200, description: "Berhasil")]
     )]
     public function index()
     {
@@ -29,7 +42,7 @@ class BidController extends Controller
         summary: "Mengambil data penawaran spesifik",
         security: [["ApiKeyAuth" => []]],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Penawaran", schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
         ],
         responses: [
             new OA\Response(response: 200, description: "Detail penawaran."),
@@ -39,36 +52,61 @@ class BidController extends Controller
     public function show($id)
     {
         $bid = Bid::find($id);
-        if (!$bid) return $this->errorResponse('Penawaran tidak ditemukan', 404);
+        if (! $bid) {
+            return $this->errorResponse('Penawaran tidak ditemukan', 404);
+        }
         return $this->successResponse($bid, 'Detail penawaran.');
     }
 
     #[OA\Post(
         path: "/api/v1/bids",
-        summary: "Menambah penawaran baru",
+        summary: "Mengajukan penawaran baru",
         security: [["ApiKeyAuth" => []]],
         requestBody: new OA\RequestBody(
             required: true,
-            description: "Data penawaran yang akan diajukan",
             content: new OA\JsonContent(
                 required: ["item_id", "bid_amount"],
                 properties: [
-                    new OA\Property(property: "item_id", type: "string", example: "ITEM-DUMMY", description: "ID dari item yang ditawar"),
-                    new OA\Property(property: "bid_amount", type: "number", example: 50000, description: "Jumlah penawaran")
+                    new OA\Property(property: "item_id",    type: "string", example: "ITEM-001"),
+                    new OA\Property(property: "bid_amount", type: "number", example: 150000),
                 ]
             )
         ),
-        responses: [
-            new OA\Response(response: 201, description: "Penawaran berhasil diajukan.")
-        ]
+        responses: [new OA\Response(response: 201, description: "Penawaran berhasil diajukan.")]
     )]
     public function store(Request $request)
     {
-        $bid = Bid::create([
-            'item_id' => $request->input('item_id', 'ITEM-DUMMY'),
-            'user_id' => 'USR-112',
-            'bid_amount' => $request->input('bid_amount', 0)
+        $request->validate([
+            'item_id'    => 'required|string',
+            'bid_amount' => 'required|numeric|min:1',
         ]);
-        return $this->successResponse($bid, 'Penawaran berhasil diajukan.', 201);
+
+        $ssoUser = $request->input('sso_user');
+        $userId  = $ssoUser ? (string) $ssoUser->id : 'USR-' . rand(100, 999);
+
+        $bid = Bid::create([
+            'item_id'    => $request->input('item_id'),
+            'user_id'    => $userId,
+            'bid_amount' => $request->input('bid_amount'),
+        ]);
+
+        // Modul 2: SOAP Audit
+        $receiptNumber = null;
+        try {
+            $m2mToken      = $this->ssoService->getM2MToken();
+            $receiptNumber = $this->soapAuditService->auditBid($bid->toArray(), $m2mToken);
+
+            if ($receiptNumber) {
+                $bid->update(['soap_receipt_number' => $receiptNumber]);
+            }
+        } catch (\Exception $e) {
+            Log::error('[SOAP] Gagal audit bid', ['error' => $e->getMessage(), 'bid_id' => $bid->id]);
+        }
+
+        return $this->successResponse(
+            array_merge($bid->fresh()->toArray(), ['soap_receipt_number' => $receiptNumber]),
+            'Penawaran berhasil diajukan.',
+            201
+        );
     }
 }
