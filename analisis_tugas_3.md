@@ -17,14 +17,14 @@ Sebaliknya, endpoint `GET /api/v1/bids` dan `GET /api/v1/bids/{id}` tidak dipili
 
 ![Sequence Diagram Interaksi Penawaran Service Dengan Layanan Terpusat](./SQ_IAE.png)
 
--(POST /api/v1/bids) = Klien mengirim request penawaran baru berisi item_id dan bid_amount dengan header X-IAE-KEY.
--(Validasi X-IAE-KEY) = Service memverifikasi bahwa request berasal dari klien yang sah menggunakan API key lokal.
--(POST /auth/token) (hanya jika token M2M belum ada/expired) = Service meminta token M2M baru ke server SSO dosen menggunakan CENTRAL_TEAM_API_KEY.
--(200 token M2M_JWT) = Server SSO mengembalikan JWT M2M yang akan digunakan untuk autentikasi ke layanan SOAP dan RabbitMQ.
--(Simpan Bid ke DB) = Service menyimpan data penawaran baru ke tabel bids di database lokal.
--(POST /soap/v1/audit) = Service mengirim XML Envelope berisi data penawaran (BidPlaced) ke endpoint audit dosen dengan Bearer token M2M.
--(ReceiptNumber) = Server audit mengembalikan nomor resi (ReceiptNumber) sebagai bukti bahwa transaksi sudah tercatat secara resmi.
--(Update soap_receipt_number) = Service menyimpan ReceiptNumber tersebut ke kolom soap_receipt_number pada record bid yang baru dibuat.
--(POST /messages/publish) = Service mem-broadcast event bid.placed berisi detail penawaran ke message broker dosen agar diketahui departemen/service lain.
--(success true) = Broker mengonfirmasi bahwa event berhasil dipublikasikan tanpa error.
--(201 Created) = Service mengembalikan response akhir ke klien berisi data bid lengkap beserta soap_receipt_number sebagai tanda transaksi selesai dan teraudit.
+- (POST /api/v1/bids) = Klien mengirim request penawaran baru berisi item_id dan bid_amount dengan header X-IAE-KEY.
+- (Validasi X-IAE-KEY) = Service memverifikasi bahwa request berasal dari klien yang sah menggunakan API key lokal.
+- (POST /auth/token) (hanya jika token M2M belum ada/expired) = Service meminta token M2M baru ke server SSO dosen menggunakan CENTRAL_TEAM_API_KEY.
+- (200 token M2M_JWT) = Server SSO mengembalikan JWT M2M yang akan digunakan untuk autentikasi ke layanan SOAP dan RabbitMQ.
+- (Simpan Bid ke DB) = Service menyimpan data penawaran baru ke tabel bids di database lokal.
+- (POST /soap/v1/audit) = Service mengirim XML Envelope berisi data penawaran (BidPlaced) ke endpoint audit dosen dengan Bearer token M2M.
+- (ReceiptNumber) = Server audit mengembalikan nomor resi (ReceiptNumber) sebagai bukti bahwa transaksi sudah tercatat secara resmi.
+- (Update soap_receipt_number) = Service menyimpan ReceiptNumber tersebut ke kolom soap_receipt_number pada record bid yang baru dibuat.
+- (POST /messages/publish) = Service mem-broadcast event bid.placed berisi detail penawaran ke message broker dosen agar diketahui departemen/service lain.
+- (success true) = Broker mengonfirmasi bahwa event berhasil dipublikasikan tanpa error.
+- (201 Created) = Service mengembalikan response akhir ke klien berisi data bid lengkap beserta soap_receipt_number sebagai tanda transaksi selesai dan teraudit.
