@@ -15,17 +15,20 @@ class SsoService
 {
     private string $baseUrl;
     private string $apiKey;
+    private string $nim;
 
     public function __construct()
     {
         $this->baseUrl = env('CENTRAL_SERVER_URL');
         $this->apiKey  = env('CENTRAL_TEAM_API_KEY');
+        $this->nim     = env('CENTRAL_TEAM_NIM');
     }
 
     public function loginM2M(): string
     {
         $response = Http::post("{$this->baseUrl}/api/v1/auth/token", [
             'api_key' => $this->apiKey,
+            'nim'     => $this->nim,  
         ]);
 
         if (! $response->successful()) {
@@ -59,6 +62,36 @@ class SsoService
         Log::debug('[SSO] Cache kosong, request M2M token baru');
         return $this->loginM2M();
     }
+
+    public function loginUser(string $email, string $password): array
+{
+    $response = Http::post("{$this->baseUrl}/api/v1/auth/token", [
+        'email'    => $email,
+        'password' => $password,
+    ]);
+
+    if (! $response->successful()) {
+        Log::warning('[SSO] User login gagal', ['email' => $email]);
+        throw new RuntimeException('Email atau password salah');
+    }
+
+    $token = $response->json('token')
+        ?? throw new RuntimeException('Token tidak ditemukan di response SSO');
+
+    $payload = $this->decodeAndVerify($token);
+    $ssoUser = $this->mapToLocalRole($token, $payload);
+
+    Log::info('[SSO] User login berhasil', [
+        'email'      => $email,
+        'local_role' => $ssoUser->localRole->name,
+    ]);
+
+    return [
+        'token'    => $token,
+        'sso_user' => $ssoUser,
+        'payload'  => $payload,
+    ];
+}
 
     public function decodeAndVerify(string $token): array
     {
