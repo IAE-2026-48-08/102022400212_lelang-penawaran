@@ -64,6 +64,7 @@ Seluruh *endpoint* REST maupun GraphQL dilindungi. Anda **wajib** menyertakan *h
 Akses antarmuka dokumentasi Swagger untuk menguji *endpoint* REST secara langsung.
 
 * **URL:** `http://localhost:8000/api/documentation`
+* **URL:** `http://localhost:8000/graphql-playground`
 
 **Endpoint REST yang tersedia:**
 
