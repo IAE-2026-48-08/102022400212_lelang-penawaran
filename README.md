@@ -46,35 +46,6 @@ docker compose up --build -d
 
 ```
 
-**3. Install dependensi PHP via Composer:**
-
-```powershell
-docker compose run app composer install
-
-```
-
-**4. Generate Application Key:**
-
-```powershell
-docker compose run app php artisan key:generate
-
-```
-
-**5. Siapkan Database SQLite:**
-
-```powershell
-# Khusus pengguna Windows PowerShell:
-New-Item database/database.sqlite -ItemType File
-
-```
-
-**6. Jalankan Migrasi Database:**
-
-```powershell
-docker compose run app php artisan migrate
-
-```
-
 > **Info:** Setelah seluruh proses selesai, API sudah siap digunakan di `http://localhost:8000`.
 
 ---
