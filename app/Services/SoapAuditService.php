@@ -12,7 +12,7 @@ class SoapAuditService
 
     public function __construct()
     {
-        $this->endpoint = env('SOAP_AUDIT_URL');
+        $this->endpoint = (string) env('SOAP_AUDIT_URL', '');
         $this->teamId   = 'TEAM-02';
     }
 

@@ -76,9 +76,20 @@ class BidController extends Controller
             'bid_amount' => 'required|numeric|min:1',
         ]);
 
+       $highestBid = Bid::where('item_id', $request->input('item_id'))->max('bid_amount');
+        if ($highestBid && $request->input('bid_amount') <= $highestBid) {
+            return $this->errorResponse(
+                'Penawaran ditolak. Harga harus lebih tinggi dari penawaran tertinggi saat ini (' . $highestBid . ').', 
+                422
+            );
+        }
+
+        Bid::where('item_id', $request->input('item_id'))
+           ->where('status', 'winning')
+           ->update(['status' => 'losing']);
+
         $ssoUser = $request->input('sso_user');
         $userId  = $ssoUser ? (string) $ssoUser->id : 'USR-' . rand(100, 999);
-
         $bid = Bid::create([
             'item_id'    => $request->input('item_id'),
             'user_id'    => $userId,

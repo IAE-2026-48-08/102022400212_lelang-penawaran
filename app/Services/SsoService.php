@@ -19,9 +19,9 @@ class SsoService
 
     public function __construct()
     {
-        $this->baseUrl = env('CENTRAL_SERVER_URL');
-        $this->apiKey  = env('CENTRAL_TEAM_API_KEY');
-        $this->nim     = env('CENTRAL_TEAM_NIM');
+        $this->baseUrl = (string) env('CENTRAL_SERVER_URL', '');
+        $this->apiKey  = (string) env('CENTRAL_TEAM_API_KEY', '');
+        $this->nim     = (string) env('CENTRAL_TEAM_NIM', '');
     }
 
     public function loginM2M(): string

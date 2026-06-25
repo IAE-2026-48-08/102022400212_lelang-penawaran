@@ -9,7 +9,7 @@ class AmqpPublisherService
 {
     public function publishViaHttp(string $routingKey, array $message, string $bearerToken): bool
     {
-        $url = env('RABBITMQ_HTTP_URL');
+        $url = (string) env('RABBITMQ_HTTP_URL', '');
 
         Log::debug('[AMQP] Sending', [
             'url'         => $url,
