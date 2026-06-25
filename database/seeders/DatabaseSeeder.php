@@ -2,24 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        DB::table('bids')->updateOrInsert(
+            [
+                'item_id' => 'ITEM-001' 
+            ], 
+            [
+                'user_id' => 'USR-001', 
+                'bid_amount' => 102022400212,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

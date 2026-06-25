@@ -11,13 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(title: "Penawaran Service API", version: "1.0.0")]
-#[OA\SecurityScheme(
-    securityScheme: "ApiKeyAuth",
-    type: "apiKey",
-    in: "header",
-    name: "X-IAE-KEY"
-)]
 class BidController extends Controller
 {
     use ApiResponser;

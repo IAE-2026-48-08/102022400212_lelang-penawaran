@@ -1,16 +1,24 @@
 FROM php:8.2-cli
 
 WORKDIR /var/www/html
+
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip sqlite3 libsqlite3-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 COPY . .
 
 EXPOSE 8000
+
+RUN chmod +x start.sh
+
+ENTRYPOINT ["./start.sh"]
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

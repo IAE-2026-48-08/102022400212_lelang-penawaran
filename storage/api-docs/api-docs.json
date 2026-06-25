@@ -28,10 +28,9 @@
                 ]
             },
             "post": {
-                "summary": "Menambah penawaran baru",
+                "summary": "Mengajukan penawaran baru",
                 "operationId": "6d15862526939567f5dd5fe8e1db54d2",
                 "requestBody": {
-                    "description": "Data penawaran yang akan diajukan",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -42,14 +41,12 @@
                                 ],
                                 "properties": {
                                     "item_id": {
-                                        "description": "ID dari item yang ditawar",
                                         "type": "string",
-                                        "example": "ITEM-DUMMY"
+                                        "example": "ITEM-001"
                                     },
                                     "bid_amount": {
-                                        "description": "Jumlah penawaran",
                                         "type": "number",
-                                        "example": 50000
+                                        "example": 150000
                                     }
                                 },
                                 "type": "object"
@@ -77,7 +74,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID Penawaran",
                         "required": true,
                         "schema": {
                             "type": "integer"
